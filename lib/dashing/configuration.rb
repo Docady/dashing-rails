@@ -6,7 +6,7 @@ module Dashing
   class Configuration
 
     attr_reader   :redis
-    attr_accessor :redis_host, :redis_port, :redis_password, :redis_namespace, :redis_timeout
+    attr_accessor :redis_url, :redis_host, :redis_port, :redis_password, :redis_namespace, :redis_timeout
     attr_accessor :auth_token, :devise_allowed_models
     attr_accessor :jobs_path
     attr_accessor :default_dashboard, :dashboards_views_path, :dashboard_layout_path
@@ -18,6 +18,7 @@ module Dashing
       @scheduler              = ::Rufus::Scheduler.new
 
       # Redis
+      @redis_url              = nil
       @redis_host             = '127.0.0.1'
       @redis_port             = '6379'
       @redis_password         = nil
@@ -47,7 +48,12 @@ module Dashing
     end
 
     def new_redis_connection
-      ::Redis.new(host: redis_host, port: redis_port, password: redis_password)
+      if redis_url
+        args = { url: redis_url }
+      else
+        args = { host: redis_host, port: redis_port, password: redis_password }
+      end
+      ::Redis.new(args)
     end
 
     private
